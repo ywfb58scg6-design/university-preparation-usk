@@ -3,43 +3,51 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
-    request
+    request: {
+      headers: request.headers,
+    },
   })
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  if (!supabaseUrl || !supabaseAnonKey) {
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
     return response
   }
 
   const supabase = createServerClient(
     supabaseUrl,
-    supabaseAnonKey,
+    supabaseKey,
     {
       cookies: {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+
+        setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value)
           })
 
           response = NextResponse.next({
-            request
+            request: {
+              headers: request.headers,
+            },
           })
 
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options)
           })
-        }
-      }
+        },
+      },
     }
   )
 
   const {
-    data: { user }
+    data: { user },
   } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
@@ -51,7 +59,7 @@ export async function middleware(request: NextRequest) {
     '/dates',
     '/calendar',
     '/settings',
-    '/setup'
+    '/setup',
   ]
 
   const isProtectedRoute = protectedRoutes.some(
@@ -97,7 +105,6 @@ export const config = {
     '/settings/:path*',
     '/setup/:path*',
     '/login/:path*',
-    '/register/:path*'
-  ]
+    '/register/:path*',
+  ],
 }
-
