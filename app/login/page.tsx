@@ -22,10 +22,10 @@ export default function LoginPage() {
     try {
       const supabase = createClient()
 
-      const { error: loginError } =
+      const { data, error: loginError } =
         await supabase.auth.signInWithPassword({
           email,
-          password
+          password,
         })
 
       if (loginError) {
@@ -33,8 +33,14 @@ export default function LoginPage() {
         return
       }
 
-      router.push('/dashboard')
-      router.refresh()
+      if (!data.session) {
+        setError(
+          'Login succeeded, but no session was created. Please try again.'
+        )
+        return
+      }
+
+      window.location.href = '/dashboard'
     } catch (err) {
       setError(
         err instanceof Error
@@ -85,11 +91,9 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <div className="mb-1.5 flex items-center justify-between">
-                <label htmlFor="password" className="label mb-0">
-                  Password
-                </label>
-              </div>
+              <label htmlFor="password" className="label">
+                Password
+              </label>
 
               <input
                 id="password"
@@ -106,10 +110,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div
-                className="alert-error"
-                role="alert"
-              >
+              <div className="alert-error" role="alert">
                 {error}
               </div>
             )}
@@ -146,5 +147,3 @@ export default function LoginPage() {
     </main>
   )
 }
-
-  
