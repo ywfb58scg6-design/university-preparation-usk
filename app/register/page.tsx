@@ -39,7 +39,10 @@ export default function RegisterPage() {
       const { data, error: registerError } =
         await supabase.auth.signUp({
           email,
-          password
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
         })
 
       if (registerError) {
