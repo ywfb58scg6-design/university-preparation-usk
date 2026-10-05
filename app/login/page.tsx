@@ -2,12 +2,9 @@
 
 import Link from 'next/link'
 import { FormEvent, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
 export default function LoginPage() {
-  const router = useRouter()
-
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,7 +21,7 @@ export default function LoginPage() {
 
       const { data, error: loginError } =
         await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim(),
           password,
         })
 
@@ -39,6 +36,9 @@ export default function LoginPage() {
         )
         return
       }
+
+      // Give the browser a moment to persist the Supabase session.
+      await new Promise((resolve) => setTimeout(resolve, 300))
 
       window.location.href = '/dashboard'
     } catch (err) {
@@ -125,7 +125,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link
               href="/register"
               className="font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
