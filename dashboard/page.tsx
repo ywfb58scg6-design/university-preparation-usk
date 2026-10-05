@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 
 export default function DashboardPage() {
   const router = useRouter()
+
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(true)
 
